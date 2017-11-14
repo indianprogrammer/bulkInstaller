@@ -6,8 +6,15 @@
 package installer;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.ListModel;
 
 /**
  *
@@ -35,6 +42,8 @@ public class Search extends javax.swing.JFrame {
         buttonInstall = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         listSearch = new javax.swing.JList();
+        textIpAddress = new javax.swing.JTextField();
+        textLastIp = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -52,31 +61,52 @@ public class Search extends javax.swing.JFrame {
             }
         });
 
+        listSearch.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(listSearch);
+
+        textIpAddress.setText("192.168.4");
+
+        textLastIp.setText("255");
+        textLastIp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textLastIpActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addGap(29, 29, 29)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 332, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(textIpAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textLastIp, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(buttonSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(35, 35, 35))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 332, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(35, 35, 35))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(26, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(buttonSearch)
-                    .addComponent(buttonInstall))
+                    .addComponent(textIpAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(textLastIp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(buttonSearch))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(buttonInstall)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 355, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -88,6 +118,33 @@ public class Search extends javax.swing.JFrame {
     }//GEN-LAST:event_buttonInstallActionPerformed
 
     private void buttonSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSearchActionPerformed
+        String ipAddress = textIpAddress.getText();
+        int lastIpAddress = Integer.valueOf(textLastIp.getText());
+
+        List<Future<PingResult>> list = PingParallel.PingParallel(ipAddress, lastIpAddress);
+
+        DefaultListModel listModel = new DefaultListModel();
+//        for (int i = 0; i < listSearch.getModel().getSize(); i++) {
+//            listModel.addElement(listSearch.getModel().getElementAt(i));
+//        }
+        
+
+        for (Future<PingResult> fut : list) {
+            try {
+                //System.out.println(new Date()+ "::"+fut.get());
+                if(fut.get().getResultCode()){
+                    listModel.addElement(fut.get().getIpAddress());
+                }
+                
+                System.out.println(new Date() + "::" + fut.get().getIpAddress() + "::" + fut.get().getResultCode());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        listSearch.setModel(listModel);
+
         try {
             // TODO add your handling code here:
             prob(1);
@@ -95,6 +152,10 @@ public class Search extends javax.swing.JFrame {
             Logger.getLogger(Search.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_buttonSearchActionPerformed
+
+    private void textLastIpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textLastIpActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textLastIpActionPerformed
 
     /**
      * @param args the command line arguments
@@ -136,20 +197,21 @@ public class Search extends javax.swing.JFrame {
     private javax.swing.JButton buttonSearch;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JList listSearch;
+    private javax.swing.JTextField textIpAddress;
+    private javax.swing.JTextField textLastIp;
     // End of variables declaration//GEN-END:variables
 
     private void prob(Object m) throws IOException {
         System.out.println("event called---" + m);
-        
-        
+
         byte[] ip = new byte[]{(byte) 103, (byte) 69, 44, (byte) 2};
-       
-        if(Common.ping(ip)){
-            System.out.println("success");  
-        }else{
-            System.out.println("false");  
+
+        if (Common.ping(ip)) {
+            System.out.println("success");
+        } else {
+            System.out.println("false");
         }
-        
+
     }
-    
+
 }
