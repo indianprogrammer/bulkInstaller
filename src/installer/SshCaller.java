@@ -30,13 +30,24 @@ public class SshCaller extends Thread{
         switch(flag){
             case "provision" :{
                 provision();
+                break;
+            }
+            case "ifconfig" :{
+                ifconfig();
+                break;
             }
         }
+    }
+    
+    private boolean ifconfig(){
+        String ifConfigCommand = "ifconfig";        
+        return ssh(host,user,password,ifConfigCommand);
     }
     
     private boolean provision(){
         //String provisionCommand = "wget http://139.59.77.240/install/firmware.sh && chmod a+x firmware.sh && ./firmware.sh";
         String provisionCommand = "ifconfig";
+        //String provisionCommand = "cat /etc/cleanfirewall.user";
         
         return ssh(host,user,password,provisionCommand);
     }
@@ -82,11 +93,11 @@ public class SshCaller extends Thread{
             }
             channel.disconnect();
             session.disconnect();
-            System.out.println("success IP --" + host);
+            System.out.println(Installer.ANSI_GREEN + "success IP --" + host + Installer.ANSI_RESET);
             return true;
         } catch (Exception e) {
             //e.printStackTrace();
-            System.out.println("failed IP --" + host);
+            System.out.println(Installer.ANSI_RED + "failed IP --" + host + Installer.ANSI_RESET);
         }
         return false;
              

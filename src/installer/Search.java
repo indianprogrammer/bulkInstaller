@@ -43,8 +43,15 @@ public class Search extends javax.swing.JFrame {
         listSearch = new javax.swing.JList();
         textIpAddress = new javax.swing.JTextField();
         textLastIp = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Bulk Firmware Installer");
+        setAlwaysOnTop(true);
+        setLocation(new java.awt.Point(10, 0));
+        setLocationByPlatform(true);
+        setResizable(false);
+        setType(java.awt.Window.Type.UTILITY);
 
         buttonSearch.setText("Search");
         buttonSearch.addActionListener(new java.awt.event.ActionListener() {
@@ -72,6 +79,13 @@ public class Search extends javax.swing.JFrame {
             }
         });
 
+        jButton1.setText("IP config");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -91,6 +105,8 @@ public class Search extends javax.swing.JFrame {
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 332, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(35, 35, 35))))
         );
@@ -103,7 +119,9 @@ public class Search extends javax.swing.JFrame {
                     .addComponent(textLastIp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(buttonSearch))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(buttonInstall)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(buttonInstall)
+                    .addComponent(jButton1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 355, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -113,15 +131,7 @@ public class Search extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonInstallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonInstallActionPerformed
-        String routerIp;
-        Iterator itr = onlineRouterList.iterator();
-        while (itr.hasNext()) {
-            routerIp = (String) itr.next();
-            //SshCaller.provision(routerIp, "root", "root");
-            SshCaller t1 = new SshCaller(routerIp, "root", "root", "provision");
-            t1.start();
-            System.out.println();
-        }
+        connectRouter("provision");      
     }//GEN-LAST:event_buttonInstallActionPerformed
 
     private void buttonSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSearchActionPerformed
@@ -155,6 +165,10 @@ public class Search extends javax.swing.JFrame {
     private void textLastIpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textLastIpActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_textLastIpActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        connectRouter("ifconfig");
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -194,10 +208,27 @@ public class Search extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonInstall;
     private javax.swing.JButton buttonSearch;
+    private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JList listSearch;
     private javax.swing.JTextField textIpAddress;
     private javax.swing.JTextField textLastIp;
     // End of variables declaration//GEN-END:variables
+
+    private void connectRouter(String task){
+        String username = "root";
+        String password = "root";
+        connectRouter(task,username,password);
+    }
+    
+    private void connectRouter(String task,String username,String password) {
+        String routerIp;
+        Iterator itr = onlineRouterList.iterator();
+        while (itr.hasNext()) {
+            routerIp = (String) itr.next();
+            SshCaller threadWorker = new SshCaller(routerIp, username, password, task);
+            threadWorker.start();
+        }
+    }
 
 }
