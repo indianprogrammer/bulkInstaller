@@ -15,13 +15,36 @@ import java.io.InputStream;
  *
  * @author root
  */
-public class SshCaller {
-    public static boolean provision(String host,String username,String password){
-        String provisionCommand = "wget http://139.59.77.240/install/firmware.sh && chmod a+x firmware.sh && ./firmware.sh";
-        return ssh(host,username,password,provisionCommand);
+public class SshCaller extends Thread{
+    private String host,user,password,flag;
+    
+    public SshCaller(String hostname, String username, String pass, String flags){
+        host = hostname;
+        user = username;
+        password = pass;
+        flag = flags;
     }
     
-    private static boolean ssh(String host, String user, String password, String command){
+    @Override
+    public void run(){
+        switch(flag){
+            case "provision" :{
+                provision();
+            }
+        }
+    }
+    
+    private boolean provision(){
+        //String provisionCommand = "wget http://139.59.77.240/install/firmware.sh && chmod a+x firmware.sh && ./firmware.sh";
+        String provisionCommand = "ifconfig";
+        
+        return ssh(host,user,password,provisionCommand);
+    }
+    
+    private boolean ssh(String host, String user, String password, String command){
+        System.out.println(host + "--" + user + "--" + password + "--" + command );
+        //return false;
+       
         try {
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking", "no");
@@ -53,18 +76,20 @@ public class SshCaller {
                     break;
                 }
                 try {
-                    Thread.sleep(1000);
+                    //Thread.sleep(1000);
                 } catch (Exception ee) {
                 }
             }
             channel.disconnect();
             session.disconnect();
-            System.out.println("DONE");
+            System.out.println("success IP --" + host);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("failed IP --" + host);
         }
         return false;
+             
     }
 
 }

@@ -5,7 +5,10 @@
  */
 package installer;
 
+import java.util.ArrayList;
+import static java.util.Collections.list;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Future;
 import javax.swing.DefaultListModel;
@@ -19,6 +22,8 @@ public class Search extends javax.swing.JFrame {
     /**
      * Creates new form Search
      */
+    ArrayList<String> onlineRouterList;
+
     public Search() {
         initComponents();
     }
@@ -108,35 +113,41 @@ public class Search extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonInstallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonInstallActionPerformed
-        SshCaller.provision("192.168.4.206", "root", "root");
+        String routerIp;
+        Iterator itr = onlineRouterList.iterator();
+        while (itr.hasNext()) {
+            routerIp = (String) itr.next();
+            //SshCaller.provision(routerIp, "root", "root");
+            SshCaller t1 = new SshCaller(routerIp, "root", "root", "provision");
+            t1.start();
+            System.out.println();
+        }
     }//GEN-LAST:event_buttonInstallActionPerformed
 
     private void buttonSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSearchActionPerformed
+        onlineRouterList = new ArrayList<String>();
+        String onlineIpAddress;
         String ipAddress = textIpAddress.getText();
         int lastIpAddress = Integer.valueOf(textLastIp.getText());
 
         List<Future<PingResult>> list = PingParallel.PingParallel(ipAddress, lastIpAddress);
 
         DefaultListModel listModel = new DefaultListModel();
-//        for (int i = 0; i < listSearch.getModel().getSize(); i++) {
-//            listModel.addElement(listSearch.getModel().getElementAt(i));
-//        }
         
-
         for (Future<PingResult> fut : list) {
             try {
-                //System.out.println(new Date()+ "::"+fut.get());
-                if(fut.get().getResultCode()){
-                    listModel.addElement(fut.get().getIpAddress());
+                if (fut.get().getResultCode()) {
+                    onlineIpAddress = fut.get().getIpAddress();
+                    listModel.addElement(onlineIpAddress);
+                    onlineRouterList.add(onlineIpAddress);
                 }
-                
-                System.out.println(new Date() + "::" + fut.get().getIpAddress() + "::" + fut.get().getResultCode());
 
+                System.out.println(new Date() + "::" + fut.get().getIpAddress() + "::" + fut.get().getResultCode());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        
+
         listSearch.setModel(listModel);
 
     }//GEN-LAST:event_buttonSearchActionPerformed
