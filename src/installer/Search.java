@@ -5,16 +5,10 @@
  */
 package installer;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.ListModel;
 
 /**
  *
@@ -114,7 +108,7 @@ public class Search extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonInstallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonInstallActionPerformed
-        // TODO add your handling code here:
+        SshCaller.provision("192.168.4.206", "root", "root");
     }//GEN-LAST:event_buttonInstallActionPerformed
 
     private void buttonSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSearchActionPerformed
@@ -145,12 +139,6 @@ public class Search extends javax.swing.JFrame {
         
         listSearch.setModel(listModel);
 
-        try {
-            // TODO add your handling code here:
-            prob(1);
-        } catch (IOException ex) {
-            Logger.getLogger(Search.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }//GEN-LAST:event_buttonSearchActionPerformed
 
     private void textLastIpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textLastIpActionPerformed
@@ -200,18 +188,5 @@ public class Search extends javax.swing.JFrame {
     private javax.swing.JTextField textIpAddress;
     private javax.swing.JTextField textLastIp;
     // End of variables declaration//GEN-END:variables
-
-    private void prob(Object m) throws IOException {
-        System.out.println("event called---" + m);
-
-        byte[] ip = new byte[]{(byte) 103, (byte) 69, 44, (byte) 2};
-
-        if (Common.ping(ip)) {
-            System.out.println("success");
-        } else {
-            System.out.println("false");
-        }
-
-    }
 
 }
